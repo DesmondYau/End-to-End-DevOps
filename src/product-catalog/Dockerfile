@@ -1,31 +1,31 @@
+# 1st stage
 FROM golang:1.22-alpine AS builder
 
-WORKDIR /usr/src/app/
+# Set the worker directory
+WORKDIR /usr/src/app
 
-# Use Go build cache for dependencies
-RUN --mount=type=cache,target=/go/pkg/mod \
-    --mount=type=cache,target=/root/.cache/go-build \
-    mkdir -p /root/.cache/go-build
-
-# Copy
-COPY go.mod go.sum ./
-
-# Download
-RUN go mod download
-
-# Copy the rest of the source code
+# Copy every files (including source code, go.mod, go.sum) in build context (directory where we run docker build) into current WORKDIR (/usr/src/app)
 COPY . .
 
-RUN go build -o product-catalog .
+# Fetch project dependency listed in go.mod file
+RUN go mod download
 
-####################################
+# Build go binary
+RUN go build -o /go/bin/product-catalog .
 
-FROM alpine AS release
 
-WORKDIR /usr/src/app/
+# 2nd stage 
+FROM alpine as release
 
-COPY ./products/ ./products/
-COPY --from=builder /usr/src/app/product-catalog/ ./
+WORKDIR /usr/src/app
 
-ENV PRODUCT_CATALOG_PORT=8088
-ENTRYPOINT [ "./product-catalog" ]
+# COPY ./prodcuts directory in build context into ./products in container (application reads json in this directory)
+# Copy binary from 1st stage to current WORKDIR (usr/src/app)
+COPY ./products ./products
+COPY --from=builder /go/bin/product-catalog .
+
+# Set environment variable used by application
+ENV PRODUCT_CATALOG_PORT 8088
+
+# Execute binary
+ENTRYPOINT ["./product-catalog"]

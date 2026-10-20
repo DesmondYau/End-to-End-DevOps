@@ -70,10 +70,10 @@ spec:
 Commit it, then apply it once:
 
 ```
-git add "Argo CD/product-catalog.yaml"
+git add "Argo CD/cd-product-catelog.yaml"
 git commit -m "Add Argo CD application for product catalog"
 git push
-kubectl apply -f "Argo CD/product-catalog.yaml"
+kubectl apply -f "Argo CD/cd-product-catelog.yaml"
 ```
 
 If the product catalog's Deployment and Service already exist (created earlier with

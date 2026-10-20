@@ -62,3 +62,6 @@ test/tracetesting/tracetesting-vars.yaml
 tfplan
 *.tfplan
 crash.log
+
+# Notes
+notes.txt

@@ -1,9 +1,9 @@
 # End-to-End DevOps: Microservices E-commerce on AWS EKS
 
-Building, deploying and running a **19-service microservices application** on
-**Amazon EKS**, end to end: **infrastructure as code** with **Terraform**,
-**Kubernetes** with an **ALB Ingress**, a **GitHub Actions CI** pipeline and
-**GitOps continuous deployment** with **Argo CD**.
+An end-to-end CI/CD pipeline that takes code from pull request to production on
+**Amazon EKS**, with infrastructure provisioned in **Terraform**, CI in
+**GitHub Actions** and GitOps deployment through **Argo CD**, using the
+OpenTelemetry Demo as the workload.
 
 From a merged pull request to a running pod with no manual steps:
 

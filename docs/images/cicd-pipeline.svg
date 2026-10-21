@@ -1,4 +1,4 @@
-<svg viewBox="0 0 2100 660" width="2100" height="660" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CI/CD pipeline for the product-catalog service: a pull request or merge to main triggers GitHub Actions jobs build, code-quality, docker and updatek8s; docker pushes an image to Docker Hub, updatek8s commits the new tag to the Kubernetes manifest, Argo CD watches and syncs it to the EKS cluster, which pulls the new image from Docker Hub.">
+<svg viewBox="0 0 4200 1320" width="4200" height="1320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CI/CD pipeline for the product-catalog service: a pull request or merge to main triggers GitHub Actions jobs build, code-quality, docker and updatek8s; docker pushes an image to Docker Hub, updatek8s commits the new tag to the Kubernetes manifest, Argo CD watches and syncs it to the EKS cluster, which pulls the new image from Docker Hub.">
   <title>CI/CD pipeline: GitHub Actions, Docker Hub, Argo CD and EKS, for the product-catalog service</title>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
@@ -34,6 +34,7 @@
     <g id="icon-eks"><path d="m14.67 8.505-2.875 3.335 3.128 3.648h-1.168l-2.808-3.277v3.368h-.842V8.421h.842v2.947l2.603-2.863Zm7.225 6.751-3.369-2.021V8.421a.42.42 0 0 0-.209-.364l-4.843-2.825V1.159l8.42 4.976Zm.635-9.724L13.267.06a.422.422 0 0 0-.635.362v5.053c0 .15.08.288.208.363l4.844 2.826v4.81a.42.42 0 0 0 .205.362l4.21 2.526a.42.42 0 0 0 .638-.361V5.895a.42.42 0 0 0-.207-.363ZM11.977 23.1l-9.872-5.248V6.135l8.421-4.976v4.084L6.09 8.066a.422.422 0 0 0-.195.355v7.158a.42.42 0 0 0 .226.373l5.665 2.948a.42.42 0 0 0 .387 0l5.496-2.84 3.382 2.03Zm10.135-5.356-4.21-2.526a.42.42 0 0 0-.411-.013l-5.51 2.847-5.244-2.729v-6.67l4.436-2.824a.422.422 0 0 0 .195-.355V.42a.421.421 0 0 0-.635-.362L1.47 5.532a.421.421 0 0 0-.207.363v12.21c0 .156.086.299.223.372l10.297 5.474a.421.421 0 0 0 .401-.004l9.915-5.473a.422.422 0 0 0 .013-.73Z"/></g>
   </defs>
 
+  <g transform="scale(2)">
   <rect x="0" y="0" width="2100" height="660" fill="#ffffff"/>
 
   <!-- ============ NODES ============ -->
@@ -184,4 +185,5 @@
   <!-- caption -->
   <text x="1050" y="610" text-anchor="middle" class="small" fill="#374151">Shown for the product-catalog service — the one example wired fully into this CI/CD pipeline.</text>
   <text x="1050" y="628" text-anchor="middle" class="small" fill="#374151">Other OpenTelemetry Demo services deploy from their unmodified upstream images, not through this flow.</text>
+  </g>
 </svg>

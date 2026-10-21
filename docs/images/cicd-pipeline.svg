@@ -1,4 +1,4 @@
-<svg viewBox="0 0 1620 660" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CI/CD pipeline for the product-catalog service: a pull request or merge to main triggers GitHub Actions jobs build, code-quality, docker and updatek8s; docker pushes an image to Docker Hub, updatek8s commits the new tag to the Kubernetes manifest, Argo CD watches and syncs it to the EKS cluster, which pulls the new image from Docker Hub.">
+<svg viewBox="0 0 1620 660" width="1620" height="660" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CI/CD pipeline for the product-catalog service: a pull request or merge to main triggers GitHub Actions jobs build, code-quality, docker and updatek8s; docker pushes an image to Docker Hub, updatek8s commits the new tag to the Kubernetes manifest, Argo CD watches and syncs it to the EKS cluster, which pulls the new image from Docker Hub.">
   <title>CI/CD pipeline: GitHub Actions, Docker Hub, Argo CD and EKS, for the product-catalog service</title>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">

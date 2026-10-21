@@ -1,4 +1,4 @@
-<svg viewBox="0 0 1240 780" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Shopper traffic enters through the Internet Gateway and ALB to EKS worker nodes in private subnets across three availability zones; nodes reach the internet through a NAT Gateway per AZ; the EKS control plane reaches nodes via ENIs; Terraform state in S3 and DynamoDB sits outside the VPC.">
+<svg viewBox="0 0 1240 780" width="1240" height="780" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Shopper traffic enters through the Internet Gateway and ALB to EKS worker nodes in private subnets across three availability zones; nodes reach the internet through a NAT Gateway per AZ; the EKS control plane reaches nodes via ENIs; Terraform state in S3 and DynamoDB sits outside the VPC.">
   <title>AWS architecture: VPC, EKS, ALB, NAT, and Terraform state</title>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">

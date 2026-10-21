@@ -1,27 +1,36 @@
 # End-to-End DevOps: Microservices E-commerce on AWS EKS
 
-Infrastructure as code, Kubernetes networking and a GitOps CI/CD pipeline for a
-19-service e-commerce application running on Amazon EKS.
+Building, deploying and running a **19-service microservices application** on
+**Amazon EKS**, end to end: **infrastructure as code** with **Terraform**,
+**Kubernetes** with an **ALB Ingress**, a **GitHub Actions CI** pipeline and
+**GitOps continuous deployment** with **Argo CD**.
 
-> **What is mine and what is not.** The application in `src/` is the
-> [OpenTelemetry Demo](https://github.com/open-telemetry/opentelemetry-demo)
-> (Apache 2.0), which is where this repository's contributors and earlier commit
-> history come from. **My work is everything that builds, deploys and runs it:**
-> the Terraform infrastructure, the Kubernetes setup with an ALB Ingress, the
-> GitHub Actions CI pipeline and Argo CD continuous deployment.
+From a merged pull request to a running pod with no manual steps:
+
+**Pull request** → **build, test, lint** → **merge** → **Docker image** →
+**manifest update** → **Argo CD sync** → **rolling update on EKS**
 
 ## Highlights
 
-- **Terraform** provisions a production-style network and an EKS cluster: a VPC
-  across 3 availability zones, public and private subnets, NAT gateways, IAM roles
-  and a managed node group, with remote state in S3 and DynamoDB locking.
-- **Kubernetes** runs the shop from per-service manifests, exposed to the internet
-  through the **AWS Load Balancer Controller** (ALB Ingress, IAM roles for service
-  accounts).
-- **GitHub Actions CI** builds, tests and lints the product catalog service on every
-  pull request; on merge it publishes a Docker image and commits the new image tag.
-- **Argo CD** watches the repository and deploys the new image automatically. A
-  merged pull request is the last manual step.
+- **Infrastructure as code (Terraform):** a production-style **VPC** across **3
+  availability zones** with **public and private subnets**, **NAT gateways** and
+  route tables; an **EKS** cluster with a **managed node group** and separate
+  **IAM roles** for the control plane and the nodes; **remote state** in **S3**
+  with **DynamoDB locking**; reusable **modules** for network and cluster.
+- **Kubernetes on EKS:** per-service **Deployments and Services**, a dedicated
+  **service account**, and an internet-facing **Application Load Balancer** through
+  the **AWS Load Balancer Controller**, using **IAM roles for service accounts
+  (IRSA)**. Worker nodes run in **private subnets** with no public IPs.
+- **Continuous integration (GitHub Actions):** every pull request is **built,
+  unit-tested and linted** (golangci-lint); on merge, the pipeline **builds and pushes
+  a Docker image** with **Buildx** and **commits the new image tag** to the
+  Kubernetes manifests.
+- **Continuous deployment (Argo CD, GitOps):** Argo CD watches the repository and
+  **automatically syncs** the cluster to Git, with **self-healing** and **pruning**,
+  rolling out each new image with zero manual `kubectl` steps.
+
+The application itself is the open-source
+[OpenTelemetry Demo](https://github.com/open-telemetry/opentelemetry-demo) shop.
 
 ## AWS architecture
 

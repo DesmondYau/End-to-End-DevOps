@@ -1,4 +1,4 @@
-<svg viewBox="0 0 1580 660" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CI/CD pipeline for the product-catalog service: a pull request or merge to main triggers GitHub Actions jobs build, code-quality, docker and updatek8s; docker pushes an image to Docker Hub, updatek8s commits the new tag to the Kubernetes manifest, Argo CD watches and syncs it to the EKS cluster, which pulls the new image from Docker Hub.">
+<svg viewBox="0 0 1620 660" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CI/CD pipeline for the product-catalog service: a pull request or merge to main triggers GitHub Actions jobs build, code-quality, docker and updatek8s; docker pushes an image to Docker Hub, updatek8s commits the new tag to the Kubernetes manifest, Argo CD watches and syncs it to the EKS cluster, which pulls the new image from Docker Hub.">
   <title>CI/CD pipeline: GitHub Actions, Docker Hub, Argo CD and EKS, for the product-catalog service</title>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
@@ -19,8 +19,8 @@
     text { font-family: -apple-system, Segoe UI, Helvetica, Arial, sans-serif; fill: #1f2933; }
     .title { font-weight: 700; }
     .mono { font-family: "SFMono-Regular", Consolas, Menlo, monospace; }
-    .small { font-size: 11px; }
-    .tiny { font-size: 10px; }
+    .small { font-size: 13px; }
+    .tiny { font-size: 11.5px; }
   </style>
 
   <!-- brand marks (Simple Icons, CC0) reused as corner badges below -->
@@ -34,21 +34,21 @@
     <g id="icon-eks"><path d="m14.67 8.505-2.875 3.335 3.128 3.648h-1.168l-2.808-3.277v3.368h-.842V8.421h.842v2.947l2.603-2.863Zm7.225 6.751-3.369-2.021V8.421a.42.42 0 0 0-.209-.364l-4.843-2.825V1.159l8.42 4.976Zm.635-9.724L13.267.06a.422.422 0 0 0-.635.362v5.053c0 .15.08.288.208.363l4.844 2.826v4.81a.42.42 0 0 0 .205.362l4.21 2.526a.42.42 0 0 0 .638-.361V5.895a.42.42 0 0 0-.207-.363ZM11.977 23.1l-9.872-5.248V6.135l8.421-4.976v4.084L6.09 8.066a.422.422 0 0 0-.195.355v7.158a.42.42 0 0 0 .226.373l5.665 2.948a.42.42 0 0 0 .387 0l5.496-2.84 3.382 2.03Zm10.135-5.356-4.21-2.526a.42.42 0 0 0-.411-.013l-5.51 2.847-5.244-2.729v-6.67l4.436-2.824a.422.422 0 0 0 .195-.355V.42a.421.421 0 0 0-.635-.362L1.47 5.532a.421.421 0 0 0-.207.363v12.21c0 .156.086.299.223.372l10.297 5.474a.421.421 0 0 0 .401-.004l9.915-5.473a.422.422 0 0 0 .013-.73Z"/></g>
   </defs>
 
-  <rect x="0" y="0" width="1580" height="660" fill="#ffffff"/>
+  <rect x="0" y="0" width="1620" height="660" fill="#ffffff"/>
 
   <!-- ============ NODES ============ -->
 
   <!-- Developer -->
   <g aria-hidden="true">
-    <circle cx="28" cy="93" r="11" fill="none" stroke="#1f2933" stroke-width="2"/>
-    <path d="M12,127 Q28,105 44,127" fill="none" stroke="#1f2933" stroke-width="2"/>
+    <circle cx="38" cy="93" r="11" fill="none" stroke="#1f2933" stroke-width="2"/>
+    <path d="M22,127 Q38,105 54,127" fill="none" stroke="#1f2933" stroke-width="2"/>
   </g>
-  <text x="28" y="149" text-anchor="middle" class="small">Developer</text>
+  <text x="38" y="149" text-anchor="middle" class="small">Developer</text>
 
   <!-- PR / main trigger nodes -->
   <rect x="60" y="78" width="260" height="50" rx="10" fill="#e0e7ff" stroke="#4f46e5" stroke-width="1.5"/>
   <text x="190" y="98" text-anchor="middle" class="small title">Pull request to main</text>
-  <text x="190" y="114" text-anchor="middle" class="small mono">paths: src/product-catalog/**</text>
+  <text x="190" y="114" text-anchor="middle" class="tiny mono">paths: src/product-catalog/**</text>
   <g transform="translate(76,94)">
     <circle r="11" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
     <g transform="translate(-7,-7) scale(0.583)" fill="#181717"><use href="#icon-github"/></g>
@@ -70,119 +70,118 @@
   </g>
   <text x="440" y="58" class="small title" fill="#334155">GITHUB ACTIONS</text>
 
-  <rect x="430" y="78" width="150" height="50" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <rect x="420" y="78" width="170" height="50" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
   <text x="505" y="98" text-anchor="middle" class="small title">build</text>
   <text x="505" y="114" text-anchor="middle" class="small">go build + go test</text>
-  <g transform="translate(446,94)">
+  <g transform="translate(436,94)">
     <circle r="11" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
     <g transform="translate(-7,-7) scale(0.583)" fill="#00ADD8"><use href="#icon-go"/></g>
   </g>
 
-  <rect x="620" y="78" width="150" height="50" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+  <rect x="610" y="78" width="170" height="50" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
   <text x="695" y="98" text-anchor="middle" class="small title">docker</text>
   <text x="695" y="114" text-anchor="middle" class="small">build &amp; push image</text>
-  <g transform="translate(636,94)">
+  <g transform="translate(626,94)">
     <circle r="11" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
     <g transform="translate(-7,-7) scale(0.583)" fill="#2088FF"><use href="#icon-githubactions"/></g>
   </g>
 
-  <rect x="810" y="78" width="230" height="50" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
-  <text x="925" y="98" text-anchor="middle" class="small title">updatek8s</text>
-  <text x="925" y="114" text-anchor="middle" class="small">commit new image tag</text>
-  <g transform="translate(826,94)">
+  <rect x="800" y="78" width="260" height="50" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="930" y="98" text-anchor="middle" class="small title">updatek8s</text>
+  <text x="930" y="114" text-anchor="middle" class="small">commit new image tag</text>
+  <g transform="translate(816,94)">
     <circle r="11" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
     <g transform="translate(-7,-7) scale(0.583)" fill="#2088FF"><use href="#icon-githubactions"/></g>
   </g>
 
-  <rect x="430" y="260" width="150" height="50" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <rect x="420" y="260" width="170" height="50" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
   <text x="505" y="280" text-anchor="middle" class="small title">code-quality</text>
   <text x="505" y="296" text-anchor="middle" class="small">golangci-lint</text>
-  <g transform="translate(446,276)">
+  <g transform="translate(436,276)">
     <circle r="11" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
     <g transform="translate(-7,-7) scale(0.583)" fill="#00ADD8"><use href="#icon-go"/></g>
   </g>
 
   <!-- Docker Hub (cylinder) -->
-  <ellipse cx="695" cy="490" rx="75" ry="12" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
-  <rect x="620" y="430" width="150" height="60" fill="#dbeafe" stroke="none"/>
-  <line x1="620" y1="430" x2="620" y2="490" stroke="#2563eb" stroke-width="1.5"/>
-  <line x1="770" y1="430" x2="770" y2="490" stroke="#2563eb" stroke-width="1.5"/>
-  <ellipse cx="695" cy="430" rx="75" ry="12" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+  <ellipse cx="695" cy="490" rx="95" ry="12" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+  <rect x="600" y="430" width="190" height="60" fill="#dbeafe" stroke="none"/>
+  <line x1="600" y1="430" x2="600" y2="490" stroke="#2563eb" stroke-width="1.5"/>
+  <line x1="790" y1="430" x2="790" y2="490" stroke="#2563eb" stroke-width="1.5"/>
+  <ellipse cx="695" cy="430" rx="95" ry="12" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
   <text x="695" y="458" text-anchor="middle" class="small title">Docker Hub</text>
   <text x="695" y="474" text-anchor="middle" class="tiny mono">desmondyau/product-catalog</text>
-  <g transform="translate(636,434)">
+  <g transform="translate(616,434)">
     <circle r="11" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
     <g transform="translate(-7,-7) scale(0.583)" fill="#2496ED"><use href="#icon-docker"/></g>
   </g>
 
   <!-- Deployment manifest -->
-  <rect x="810" y="420" width="230" height="64" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
-  <text x="925" y="440" text-anchor="middle" class="small title">Deployment manifest</text>
-  <text x="925" y="456" text-anchor="middle" class="tiny mono">kubernetes/productcatalog/</text>
-  <text x="925" y="470" text-anchor="middle" class="tiny mono">deploy.yaml</text>
-  <g transform="translate(826,436)">
+  <rect x="800" y="420" width="260" height="64" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="930" y="440" text-anchor="middle" class="small title">Deployment manifest</text>
+  <text x="930" y="456" text-anchor="middle" class="tiny mono">kubernetes/productcatalog/</text>
+  <text x="930" y="470" text-anchor="middle" class="tiny mono">deploy.yaml</text>
+  <g transform="translate(816,436)">
     <circle r="11" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
     <g transform="translate(-7,-7) scale(0.583)" fill="#326CE5"><use href="#icon-kubernetes"/></g>
   </g>
 
   <!-- Argo CD -->
-  <rect x="1100" y="420" width="190" height="64" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
-  <text x="1195" y="440" text-anchor="middle" class="small title">Argo CD</text>
-  <text x="1195" y="456" text-anchor="middle" class="small">auto-sync: prune + selfHeal</text>
-  <text x="1195" y="472" text-anchor="middle" class="tiny">notices commit in ~3 min</text>
-  <g transform="translate(1116,436)">
+  <rect x="1120" y="420" width="220" height="64" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="1230" y="440" text-anchor="middle" class="small title">Argo CD</text>
+  <text x="1230" y="456" text-anchor="middle" class="small">auto-sync: prune + selfHeal</text>
+  <text x="1230" y="472" text-anchor="middle" class="tiny">notices commit in ~3 min</text>
+  <g transform="translate(1136,436)">
     <circle r="11" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
     <g transform="translate(-7,-7) scale(0.583)" fill="#EF7B4D"><use href="#icon-argo"/></g>
   </g>
 
   <!-- EKS cluster -->
-  <rect x="1350" y="420" width="190" height="64" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
-  <text x="1445" y="440" text-anchor="middle" class="small title">EKS cluster</text>
-  <text x="1445" y="456" text-anchor="middle" class="small">rolling update</text>
-  <text x="1445" y="472" text-anchor="middle" class="tiny">(zero manual kubectl)</text>
-  <g transform="translate(1366,436)">
+  <rect x="1400" y="420" width="190" height="64" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="1495" y="440" text-anchor="middle" class="small title">EKS cluster</text>
+  <text x="1495" y="456" text-anchor="middle" class="small">rolling update</text>
+  <text x="1495" y="472" text-anchor="middle" class="tiny">(zero manual kubectl)</text>
+  <g transform="translate(1416,436)">
     <circle r="11" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
     <g transform="translate(-7,-7) scale(0.583)" fill="#FF9900"><use href="#icon-eks"/></g>
   </g>
 
   <!-- ============ CONNECTORS (drawn on top, after every node) ============ -->
 
-  <line x1="40" y1="93" x2="56" y2="93" stroke="#1f2933" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="50" y1="93" x2="58" y2="93" stroke="#1f2933" stroke-width="2" marker-end="url(#arrow)"/>
 
   <line x1="190" y1="128" x2="190" y2="188" stroke="#1f2933" stroke-width="1.5" marker-end="url(#arrow)"/>
   <text x="228" y="162" text-anchor="middle" class="tiny">merge</text>
 
-  <line x1="320" y1="103" x2="428" y2="103" stroke="#1f2933" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <text x="365" y="90" text-anchor="middle" class="tiny">pull_request</text>
+  <line x1="320" y1="103" x2="418" y2="103" stroke="#1f2933" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="367" y="90" text-anchor="middle" class="tiny">pull_request</text>
 
-  <line x1="320" y1="122" x2="428" y2="282" stroke="#1f2933" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <text x="395" y="258" text-anchor="middle" class="tiny">pull_request</text>
+  <line x1="320" y1="122" x2="418" y2="282" stroke="#1f2933" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="390" y="258" text-anchor="middle" class="tiny">pull_request</text>
 
-  <line x1="320" y1="205" x2="428" y2="105" stroke="#1f2933" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="320" y1="205" x2="418" y2="105" stroke="#1f2933" stroke-width="1.5" marker-end="url(#arrow)"/>
   <text x="345" y="183" text-anchor="middle" class="tiny">push (after merge)</text>
 
-  <line x1="580" y1="103" x2="618" y2="103" stroke="#1f2933" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="590" y1="103" x2="608" y2="103" stroke="#1f2933" stroke-width="1.5" marker-end="url(#arrow)"/>
 
-  <line x1="770" y1="103" x2="808" y2="103" stroke="#1f2933" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <text x="789" y="88" text-anchor="middle" class="tiny">needs</text>
+  <line x1="780" y1="103" x2="798" y2="103" stroke="#1f2933" stroke-width="1.5" marker-end="url(#arrow)"/>
 
   <line x1="695" y1="128" x2="695" y2="416" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
   <text x="735" y="272" text-anchor="middle" class="tiny" fill="#2563eb">push image</text>
 
-  <line x1="925" y1="128" x2="925" y2="416" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arrowViolet)"/>
-  <text x="965" y="258" text-anchor="middle" class="tiny" fill="#7c3aed">commits new tag</text>
+  <line x1="930" y1="128" x2="930" y2="416" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arrowViolet)"/>
+  <text x="970" y="258" text-anchor="middle" class="tiny" fill="#7c3aed">commits new tag</text>
 
-  <line x1="1040" y1="452" x2="1098" y2="452" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
-  <text x="1070" y="436" text-anchor="middle" class="tiny" fill="#15803d">watched by</text>
+  <line x1="1060" y1="452" x2="1118" y2="452" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+  <text x="1089" y="436" text-anchor="middle" class="tiny" fill="#15803d">watches</text>
 
-  <line x1="1290" y1="452" x2="1348" y2="452" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
-  <text x="1320" y="436" text-anchor="middle" class="tiny" fill="#15803d">sync</text>
+  <line x1="1340" y1="452" x2="1398" y2="452" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+  <text x="1369" y="436" text-anchor="middle" class="tiny" fill="#15803d">sync</text>
 
-  <polyline points="695,502 695,560 1445,560 1445,482" fill="none" stroke="#2563eb" stroke-width="1.5"
+  <polyline points="695,502 695,560 1495,560 1495,482" fill="none" stroke="#2563eb" stroke-width="1.5"
             stroke-dasharray="6 4" marker-end="url(#arrowBlue)"/>
-  <text x="1070" y="552" text-anchor="middle" class="tiny" fill="#2563eb">image pull</text>
+  <text x="1095" y="552" text-anchor="middle" class="tiny" fill="#2563eb">image pull</text>
 
   <!-- caption -->
-  <text x="790" y="610" text-anchor="middle" class="small" fill="#374151">Shown for the product-catalog service — the one example wired fully into this CI/CD pipeline.</text>
-  <text x="790" y="628" text-anchor="middle" class="small" fill="#374151">Other OpenTelemetry Demo services deploy from their unmodified upstream images, not through this flow.</text>
+  <text x="810" y="610" text-anchor="middle" class="small" fill="#374151">Shown for the product-catalog service — the one example wired fully into this CI/CD pipeline.</text>
+  <text x="810" y="628" text-anchor="middle" class="small" fill="#374151">Other OpenTelemetry Demo services deploy from their unmodified upstream images, not through this flow.</text>
 </svg>

@@ -1,141 +1,217 @@
-**Note:** This project is a fork of `opentelemetry-demo`. Thanks to the team and contributors for opensourcing this wonderful demo project. Definitely one of the best on internet.
+# End-to-End DevOps: Microservices E-commerce on AWS EKS
 
-<!-- markdownlint-disable-next-line -->
-# <img src="https://opentelemetry.io/img/logos/opentelemetry-logo-nav.png" alt="OTel logo" width="45"> OpenTelemetry Demo
+Infrastructure as code, Kubernetes networking and a GitOps CI/CD pipeline for a
+19-service e-commerce application running on Amazon EKS.
 
-[![Slack](https://img.shields.io/badge/slack-@cncf/otel/demo-brightgreen.svg?logo=slack)](https://cloud-native.slack.com/archives/C03B4CWV4DA)
-[![Version](https://img.shields.io/github/v/release/open-telemetry/opentelemetry-demo?color=blueviolet)](https://github.com/open-telemetry/opentelemetry-demo/releases)
-[![Commits](https://img.shields.io/github/commits-since/open-telemetry/opentelemetry-demo/latest?color=ff69b4&include_prereleases)](https://github.com/open-telemetry/opentelemetry-demo/graphs/commit-activity)
-[![Downloads](https://img.shields.io/docker/pulls/otel/demo)](https://hub.docker.com/r/otel/demo)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?color=red)](https://github.com/open-telemetry/opentelemetry-demo/blob/main/LICENSE)
-[![Integration Tests](https://github.com/open-telemetry/opentelemetry-demo/actions/workflows/run-integration-tests.yml/badge.svg)](https://github.com/open-telemetry/opentelemetry-demo/actions/workflows/run-integration-tests.yml)
-[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/opentelemetry-demo)](https://artifacthub.io/packages/helm/opentelemetry-helm/opentelemetry-demo)
-[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9247/badge)](https://www.bestpractices.dev/en/projects/9247)
+> **What is mine and what is not.** The application in `src/` is the
+> [OpenTelemetry Demo](https://github.com/open-telemetry/opentelemetry-demo)
+> (Apache 2.0), which is where this repository's contributors and earlier commit
+> history come from. **My work is everything that builds, deploys and runs it:**
+> the Terraform infrastructure, the Kubernetes setup with an ALB Ingress, the
+> GitHub Actions CI pipeline and Argo CD continuous deployment.
 
-## Welcome to the OpenTelemetry Astronomy Shop Demo
+## Highlights
 
-This repository contains the OpenTelemetry Astronomy Shop, a microservice-based
-distributed system intended to illustrate the implementation of OpenTelemetry in
-a near real-world environment.
+- **Terraform** provisions a production-style network and an EKS cluster: a VPC
+  across 3 availability zones, public and private subnets, NAT gateways, IAM roles
+  and a managed node group, with remote state in S3 and DynamoDB locking.
+- **Kubernetes** runs the shop from per-service manifests, exposed to the internet
+  through the **AWS Load Balancer Controller** (ALB Ingress, IAM roles for service
+  accounts).
+- **GitHub Actions CI** builds, tests and lints the product catalog service on every
+  pull request; on merge it publishes a Docker image and commits the new image tag.
+- **Argo CD** watches the repository and deploys the new image automatically. A
+  merged pull request is the last manual step.
 
-Our goals are threefold:
+## AWS architecture
 
-- Provide a realistic example of a distributed system that can be used to
-  demonstrate OpenTelemetry instrumentation and observability.
-- Build a base for vendors, tooling authors, and others to extend and
-  demonstrate their OpenTelemetry integrations.
-- Create a living example for OpenTelemetry contributors to use for testing new
-  versions of the API, SDK, and other components or enhancements.
+```mermaid
+flowchart TB
+    subgraph aws["AWS: us-east-1"]
+        subgraph vpc["VPC 10.0.0.0/16"]
+            igw[Internet Gateway]
+            alb[Application Load Balancer<br/>created by the ALB Ingress]
 
-We've already made [huge
-progress](https://github.com/open-telemetry/opentelemetry-demo/blob/main/CHANGELOG.md),
-and development is ongoing. We hope to represent the full feature set of
-OpenTelemetry across its languages in the future.
+            subgraph public["Public subnets: 10.0.1.0/24, 10.0.2.0/24, 10.0.3.0/24"]
+                nat[NAT Gateway<br/>one per AZ]
+            end
 
-If you'd like to help (**which we would love**), check out our [contributing
-guidance](./CONTRIBUTING.md).
+            subgraph private["Private subnets: 10.0.11.0/24, 10.0.12.0/24, 10.0.13.0/24"]
+                nodes[EKS managed node group<br/>3 x t3.medium]
+            end
+        end
+        cp[EKS control plane<br/>managed by AWS]
+        s3[(S3 bucket<br/>Terraform state)]
+        ddb[(DynamoDB<br/>state lock)]
+    end
 
-If you'd like to extend this demo or maintain a fork of it, read our
-[fork guidance](https://opentelemetry.io/docs/demo/forking/).
+    user([Shopper]) --> igw --> alb
+    alb -->|forwards to pods| nodes
+    nodes -->|outbound: image pulls, AWS APIs| nat --> igw --> internet([Internet])
+    cp <-->|ENIs in private subnets| nodes
+```
 
-## Quick start
+| Layer | Resources |
+|---|---|
+| Network | VPC, 3 public + 3 private subnets across `us-east-1a/b/c`, Internet Gateway, one NAT Gateway per AZ, route tables |
+| Compute | EKS 1.36 control plane, managed node group (`t3.medium`, on-demand) |
+| IAM | cluster role (`AmazonEKSClusterPolicy`), node role (worker node, CNI and ECR read policies), IRSA role for the ALB controller |
+| Traffic | AWS Load Balancer Controller, internet-facing ALB in IP target mode, routing to the frontend proxy |
+| State | S3 bucket for Terraform state, DynamoDB table for state locking |
 
-You can be up and running with the demo in a few minutes. Check out the docs for
-your preferred deployment method:
+Worker nodes run in private subnets with no public IPs; the only entry point from the
+internet is the ALB in the public subnets.
 
-- [Docker](https://opentelemetry.io/docs/demo/docker_deployment/)
-- [Kubernetes](https://opentelemetry.io/docs/demo/kubernetes_deployment/)
+## CI/CD pipeline
 
-## Documentation
+```mermaid
+flowchart LR
+    dev([Developer]) -->|pull request| pr[Pull request to main]
 
-For detailed documentation, see [Demo Documentation][docs]. If you're curious
-about a specific feature, the [docs landing page][docs] can point you in the
-right direction.
+    subgraph ci["GitHub Actions"]
+        build[build<br/>go build + go test]
+        lint[code-quality<br/>golangci-lint]
+        docker[docker<br/>build and push image]
+        update[updatek8s<br/>commit new image tag]
+    end
 
-## Demos featuring the Astronomy Shop
+    pr --> build
+    pr --> lint
+    pr -->|merge| main[main branch]
+    main --> build --> docker --> update
+    docker --> hub[(Docker Hub<br/>desmondyau/product-catalog)]
+    update -->|commit| manifest[kubernetes/productcatalog/deploy.yaml]
 
-We welcome any vendor to fork the project to demonstrate their services and
-adding a link below. The community is committed to maintaining the project and
-keeping it up to date for you.
+    manifest -->|watched by| argo[Argo CD]
+    argo -->|sync| eks[EKS cluster]
+    hub -->|image pull| eks
+```
 
-|                           |                |                                  |
-|---------------------------|----------------|----------------------------------|
-| [AlibabaCloud LogService] | [Elastic]      | [OpenSearch]                     |
-| [AppDynamics]             | [Google Cloud] | [Sentry]                         |
-| [Aspecto]                 | [Grafana Labs] | [ServiceNow Cloud Observability] |
-| [Axiom]                   | [Guance]       | [Splunk]                         |
-| [Axoflow]                 | [Honeycomb.io] | [Sumo Logic]                     |
-| [Azure Data Explorer]     | [Instana]      | [TelemetryHub]                   |
-| [Coralogix]               | [Kloudfuse]    | [Teletrace]                      |
-| [Dash0]                   | [Liatrio]      | [Tracetest]                      |
-| [Datadog]                 | [Logz.io]      | [Uptrace]                        |
-| [Dynatrace]               | [New Relic]    |                                  |
+| Event | Jobs that run |
+|---|---|
+| Pull request to `main` changing `src/product-catalog/` | `build`, `code-quality` |
+| Merge to `main` | `build`, `code-quality`, then `docker` → `updatek8s` |
 
-## Contributing
+1. **build**: compiles the Go service and runs its tests.
+2. **code-quality**: static analysis with golangci-lint.
+3. **docker**: builds the image with Buildx and pushes it to Docker Hub, tagged with
+   the workflow run ID.
+4. **updatek8s**: writes the new tag into the product catalog's Deployment manifest
+   and pushes the commit to `main` as `github-actions[bot]`.
+5. **Argo CD** notices the commit within about three minutes and rolls out the new
+   image (automated sync with prune and self-heal).
 
-To get involved with the project see our [CONTRIBUTING](CONTRIBUTING.md)
-documentation. Our [SIG Calls](CONTRIBUTING.md#join-a-sig-call) are every other
-Monday at 8:30 AM PST and anyone is welcome.
+Images and manifest updates only happen after a merge, so unreviewed pull requests
+never reach the cluster.
 
-## Project leadership
+## Repository layout
 
-[Maintainers](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#maintainer)
-([@open-telemetry/demo-maintainers](https://github.com/orgs/open-telemetry/teams/demo-maintainers)):
+| Path | Contents |
+|---|---|
+| [`terraform/`](terraform/) | root module: providers, S3 backend, VPC and EKS modules, variables |
+| [`terraform/backend/`](terraform/backend/) | bootstrap: S3 state bucket and DynamoDB lock table |
+| [`terraform/modules/vpc/`](terraform/modules/vpc/) | VPC, subnets, gateways, route tables |
+| [`terraform/modules/eks/`](terraform/modules/eks/) | IAM roles, EKS cluster, managed node group |
+| [`kubernetes/`](kubernetes/) | one folder per service (Deployment, Service), service account, Ingress in `frontendproxy/` |
+| [`IngressController/`](IngressController/) | AWS Load Balancer Controller setup guide and IAM policy |
+| [`.github/workflows/ci.yaml`](.github/workflows/ci.yaml) | CI pipeline |
+| [`Argo CD/`](Argo%20CD/) | Argo CD installation guide and the product catalog Application |
+| [`src/`](src/) | application source (OpenTelemetry Demo) |
+| [`pb/`](pb/) | gRPC service definitions shared by the services |
+| [`docs/`](docs/) | the original OpenTelemetry Demo README |
 
-- [Juliano Costa](https://github.com/julianocosta89), Datadog
-- [Mikko Viitanen](https://github.com/mviitane), Dynatrace
-- [Pierre Tessier](https://github.com/puckpuck), Honeycomb
+## The application
 
-[Approvers](https://github.com/open-telemetry/community/blob/main/guides/contributor/membership.md#approver)
-([@open-telemetry/demo-approvers](https://github.com/orgs/open-telemetry/teams/demo-approvers)):
+An online shop of 19 services written in a dozen languages, talking over gRPC, HTTP
+and Kafka:
 
-- [Cedric Ziel](https://github.com/cedricziel) Grafana Labs
-- [Penghan Wang](https://github.com/wph95), AppDynamics
-- [Reiley Yang](https://github.com/reyang), Microsoft
-- [Roger Coll](https://github.com/rogercoll), Elastic
-- [Ziqi Zhao](https://github.com/fatsheep9146), Alibaba
+| Service | Language | Role |
+|---|---|---|
+| frontend | TypeScript (Next.js) | web UI |
+| frontend-proxy | Envoy | entry point behind the ALB |
+| product-catalog | Go | product list and search, **built and deployed by this pipeline** |
+| cart | C# (.NET) | shopping cart, stored in Valkey |
+| checkout | Go | orchestrates an order |
+| currency | C++ | currency conversion |
+| payment | JavaScript (Node.js) | payment processing |
+| shipping | Rust | shipping quotes |
+| quote | PHP | shipping cost calculation |
+| email | Ruby | order confirmation emails |
+| recommendation | Python | product recommendations |
+| ad | Java | contextual ads |
+| accounting | C# (.NET) | consumes orders from Kafka |
+| fraud-detection | Kotlin | consumes orders from Kafka |
+| image-provider | nginx | product images |
+| load-generator | Python (Locust) | simulated shoppers |
+| flagd | — | feature flags |
+| kafka, valkey | — | message queue and cache |
 
-Emeritus:
+The other services run from the upstream OpenTelemetry images; the product catalog
+runs from the image built by this repository's pipeline.
 
-- [Austin Parker](https://github.com/austinlparker)
-- [Carter Socha](https://github.com/cartersocha)
-- [Michael Maxwell](https://github.com/mic-max)
-- [Morgan McLean](https://github.com/mtwo)
+## Running it
 
-### Thanks to all the people who have contributed
+Prerequisites: AWS CLI, Terraform, kubectl, Helm and eksctl, with AWS credentials
+configured.
 
-[![contributors](https://contributors-img.web.app/image?repo=open-telemetry/opentelemetry-demo)](https://github.com/open-telemetry/opentelemetry-demo/graphs/contributors)
+```bash
+# 1. State backend (once)
+cd terraform/backend && terraform init && terraform apply
 
-[docs]: https://opentelemetry.io/docs/demo/
+# 2. VPC and EKS
+cd .. && terraform init && terraform apply
+aws eks update-kubeconfig --name proj-terraform-eks --region us-east-1
 
-<!-- Links for Demos featuring the Astronomy Shop section -->
+# 3. AWS Load Balancer Controller: see IngressController/kubernetes-ingress-controller.md
 
-[AlibabaCloud LogService]: https://github.com/aliyun-sls/opentelemetry-demo
-[AppDynamics]: https://www.appdynamics.com/blog/cloud/how-to-observe-opentelemetry-demo-app-in-appdynamics-cloud/
-[Aspecto]: https://github.com/aspecto-io/opentelemetry-demo
-[Axiom]: https://play.axiom.co/axiom-play-qf1k/dashboards/otel.traces.otel-demo-traces
-[Axoflow]: https://axoflow.com/opentelemetry-support-in-more-detail-in-axosyslog-and-syslog-ng/
-[Azure Data Explorer]: https://github.com/Azure/Azure-kusto-opentelemetry-demo
-[Coralogix]: https://coralogix.com/blog/configure-otel-demo-send-telemetry-data-coralogix
-[Dash0]: https://github.com/dash0hq/opentelemetry-demo
-[Datadog]: https://docs.datadoghq.com/opentelemetry/guide/otel_demo_to_datadog
-[Dynatrace]: https://www.dynatrace.com/news/blog/opentelemetry-demo-application-with-dynatrace/
-[Elastic]: https://github.com/elastic/opentelemetry-demo
-[Google Cloud]: https://github.com/GoogleCloudPlatform/opentelemetry-demo
-[Grafana Labs]: https://github.com/grafana/opentelemetry-demo
-[Guance]: https://github.com/GuanceCloud/opentelemetry-demo
-[Honeycomb.io]: https://github.com/honeycombio/opentelemetry-demo
-[Instana]: https://github.com/instana/opentelemetry-demo
-[Kloudfuse]: https://github.com/kloudfuse/opentelemetry-demo
-[Liatrio]: https://github.com/liatrio/opentelemetry-demo
-[Logz.io]: https://logz.io/learn/how-to-run-opentelemetry-demo-with-logz-io/
-[New Relic]: https://github.com/newrelic/opentelemetry-demo
-[OpenSearch]: https://github.com/opensearch-project/opentelemetry-demo
-[Sentry]: https://github.com/getsentry/opentelemetry-demo
-[ServiceNow Cloud Observability]: https://docs.lightstep.com/otel/quick-start-operator#send-data-from-the-opentelemetry-demo
-[Splunk]: https://github.com/signalfx/opentelemetry-demo
-[Sumo Logic]: https://www.sumologic.com/blog/common-opentelemetry-demo-application/
-[TelemetryHub]: https://github.com/TelemetryHub/opentelemetry-demo/tree/telemetryhub-backend
-[Teletrace]: https://github.com/teletrace/opentelemetry-demo
-[Tracetest]: https://github.com/kubeshop/opentelemetry-demo
-[Uptrace]: https://github.com/uptrace/uptrace/tree/master/example/opentelemetry-demo
+# 4. The application
+cd ../kubernetes
+kubectl apply -f serviceaccount.yaml
+for dir in */; do kubectl apply -f "$dir"; done
+kubectl get ingress -A    # the ALB address
+
+# 5. Argo CD: see "Argo CD/argocd-installation.md"
+```
+
+**Tearing down:** delete the Ingress first (`kubectl delete ingress --all -A`) and
+wait for the ALB to disappear, then remove the controller's IAM resources and run
+`terraform destroy`. The ALB is created by the controller, not Terraform, and would
+otherwise block the deletion of the subnets.
+
+## Challenges and decisions
+
+- **Private nodes behind NAT.** Worker nodes have no public IPs. They reach the
+  internet (image registries, AWS APIs) through a NAT Gateway in each availability
+  zone, and the only inbound path is the ALB.
+- **Remote Terraform state.** State lives in S3 with DynamoDB locking, bootstrapped
+  by a separate Terraform configuration, so the main configuration can be destroyed
+  and rebuilt without losing track of its state.
+- **Pod density limits.** With Argo CD installed, two `t3.medium` nodes hit the
+  17-pods-per-node limit of the VPC CNI and a rolling update stuck in `Pending`
+  ("Too many pods"). Fixed by scaling the node group to three nodes.
+- **Linting that actually lints.** An outdated golangci-lint silently skipped its
+  checks on Go 1.22 code. After upgrading, it reported three real issues in the
+  service (an unused function, a deprecated gRPC call, an unnecessary `Sprintf`),
+  which were fixed before merging.
+- **Safe GitOps commits.** The image and manifest jobs run only after a merge, and
+  the pipeline pushes without `--force`, rebasing first, so it never overwrites
+  other commits on `main`.
+
+<!--
+Screenshots to add (put images in docs/images/ and link them here):
+- a green GitHub Actions run with all four jobs
+- the Argo CD UI showing product-catalog Synced / Healthy
+- the shop's home page served through the ALB
+-->
+
+## Tech stack
+
+Terraform · AWS (VPC, EKS, EC2, IAM, ALB, S3, DynamoDB) · Kubernetes · Helm ·
+AWS Load Balancer Controller · Docker / Buildx · Docker Hub · GitHub Actions ·
+Argo CD · Go
+
+## Credits
+
+Application code: [OpenTelemetry Demo](https://github.com/open-telemetry/opentelemetry-demo),
+licensed under Apache 2.0 (see [LICENSE](LICENSE)). The original README is kept in
+[`docs/opentelemetry-demo-README.md`](docs/opentelemetry-demo-README.md).

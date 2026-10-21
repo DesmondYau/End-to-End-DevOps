@@ -19,7 +19,7 @@
     text { font-family: -apple-system, Segoe UI, Helvetica, Arial, sans-serif; fill: #1f2933; }
     .title { font-weight: 700; }
     .mono { font-family: "SFMono-Regular", Consolas, Menlo, monospace; }
-    .small { font-size: 11px; }
+    .small { font-size: 13px; }
   </style>
 
   <rect x="0" y="0" width="1240" height="780" fill="#ffffff"/>
@@ -62,7 +62,7 @@
   <line x1="460" x2="460" y1="212" y2="236" stroke="#1f2933" stroke-width="2" marker-end="url(#arrow)"/>
 
   <!-- ALB -->
-  <rect x="300" y="236" width="320" height="50" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <rect x="250" y="236" width="420" height="50" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
   <text x="460" y="258" text-anchor="middle" class="small title">Application Load Balancer</text>
   <text x="460" y="274" text-anchor="middle" class="small">internet-facing · created by ALB Ingress controller</text>
 
@@ -71,7 +71,7 @@
   <line x1="460" y1="320" x2="460" y2="308" stroke="#1f2933" stroke-width="1.5" marker-end="url(#arrow)"/>
   <line x1="700" y1="320" x2="700" y2="308" stroke="#1f2933" stroke-width="1.5" marker-end="url(#arrow)"/>
   <polyline points="700,308 100,308 100,195 390,195" fill="none" stroke="#1f2933" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <text x="160" y="303" text-anchor="middle" class="small" fill="#374151">NAT to IGW</text>
+  <text x="160" y="298" text-anchor="middle" class="small" fill="#374151">NAT to IGW</text>
 
   <!-- ALB fan: ALB forwards directly to node (pod) IPs in every private subnet -->
   <polyline points="460,286 460,295 580,295 580,445" fill="none" stroke="#d97706" stroke-width="1.5"/>

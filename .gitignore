@@ -65,3 +65,25 @@ crash.log
 
 # Notes
 notes.txt
+
+# Upstream OpenTelemetry tooling kept locally, not published
+/test/
+/internal/
+/Makefile
+/docker-compose*.yml
+/.env
+/.env.arm64
+/.env.override
+/dockerddddd
+/CHANGELOG.md
+/CONTRIBUTING.md
+/package.json
+/package-lock.json
+/renovate.json5
+/buildkitd.toml
+/docker-gen-proto.sh
+/ide-gen-proto.sh
+/.licenserc.json
+/.markdownlint.yaml
+/.yamllint
+/.yamlignore

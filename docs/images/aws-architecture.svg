@@ -1,0 +1,161 @@
+<svg viewBox="0 0 1240 780" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Shopper traffic enters through the Internet Gateway and ALB to EKS worker nodes in private subnets across three availability zones; nodes reach the internet through a NAT Gateway per AZ; the EKS control plane reaches nodes via ENIs; Terraform state in S3 and DynamoDB sits outside the VPC.">
+  <title>AWS architecture: VPC, EKS, ALB, NAT, and Terraform state</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f2933"/>
+    </marker>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrowOrange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#d97706"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#16a34a"/>
+    </marker>
+  </defs>
+
+  <style>
+    text { font-family: -apple-system, Segoe UI, Helvetica, Arial, sans-serif; fill: #1f2933; }
+    .title { font-weight: 700; }
+    .mono { font-family: "SFMono-Regular", Consolas, Menlo, monospace; }
+    .small { font-size: 11px; }
+  </style>
+
+  <rect x="0" y="0" width="1240" height="780" fill="#ffffff"/>
+
+  <!-- Shopper -->
+  <g aria-hidden="true">
+    <circle cx="150" cy="40" r="12" fill="none" stroke="#1f2933" stroke-width="2"/>
+    <path d="M132,78 Q150,54 168,78" fill="none" stroke="#1f2933" stroke-width="2"/>
+  </g>
+  <text x="150" y="98" text-anchor="middle" class="small">Shopper</text>
+
+  <!-- Internet cloud -->
+  <g aria-hidden="true">
+    <path d="M520,55 a22,22 0 0,1 0,-44 a28,28 0 0,1 54,-8 a24,24 0 0,1 8,52 z"
+          fill="#f3f4f6" stroke="#6b7280" stroke-width="2"/>
+  </g>
+  <text x="565" y="35" text-anchor="middle" class="small">Internet</text>
+
+  <line x1="196" x2="492" y1="40" y2="40" stroke="#1f2933" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="340" y="30" text-anchor="middle" class="small">HTTPS request</text>
+
+  <line x1="548" x2="450" y1="74" y2="172" stroke="#2563eb" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <text x="415" y="125" text-anchor="middle" class="small" fill="#2563eb">ingress</text>
+
+  <line x1="500" x2="588" y1="172" y2="74" stroke="#d97706" stroke-width="2" marker-end="url(#arrowOrange)"/>
+  <text x="640" y="125" text-anchor="middle" class="small" fill="#d97706">egress (via NAT)</text>
+
+  <!-- AWS account boundary -->
+  <rect x="60" y="110" width="1130" height="580" rx="10" fill="none" stroke="#FF9900" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="80" y="134" class="small title" fill="#b45309">AWS ACCOUNT · us-east-1</text>
+
+  <!-- VPC -->
+  <rect x="90" y="150" width="770" height="500" rx="8" fill="none" stroke="#2563eb" stroke-width="2"/>
+  <text x="110" y="172" class="small title" fill="#1d4ed8">VPC · 10.0.0.0/16</text>
+
+  <!-- IGW -->
+  <rect x="390" y="170" width="140" height="42" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="460" y="196" text-anchor="middle" class="small">Internet Gateway</text>
+
+  <line x1="460" x2="460" y1="212" y2="236" stroke="#1f2933" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ALB -->
+  <rect x="300" y="236" width="320" height="50" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="460" y="258" text-anchor="middle" class="small title">Application Load Balancer</text>
+  <text x="460" y="274" text-anchor="middle" class="small">internet-facing · created by ALB Ingress controller</text>
+
+  <!-- NAT bus: each AZ's NAT Gateway feeds a shared bus up to the IGW -->
+  <line x1="220" y1="320" x2="220" y2="308" stroke="#1f2933" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="460" y1="320" x2="460" y2="308" stroke="#1f2933" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="700" y1="320" x2="700" y2="308" stroke="#1f2933" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <polyline points="700,308 100,308 100,195 390,195" fill="none" stroke="#1f2933" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="160" y="303" text-anchor="middle" class="small" fill="#374151">NAT to IGW</text>
+
+  <!-- ALB fan: ALB forwards directly to node (pod) IPs in every private subnet -->
+  <polyline points="460,286 460,295 580,295 580,445" fill="none" stroke="#d97706" stroke-width="1.5"/>
+  <line x1="220" y1="445" x2="700" y2="445" stroke="#d97706" stroke-width="1.5"/>
+  <line x1="220" y1="445" x2="220" y2="470" stroke="#d97706" stroke-width="1.5" marker-end="url(#arrowOrange)"/>
+  <line x1="460" y1="445" x2="460" y2="470" stroke="#d97706" stroke-width="1.5" marker-end="url(#arrowOrange)"/>
+  <line x1="700" y1="445" x2="700" y2="470" stroke="#d97706" stroke-width="1.5" marker-end="url(#arrowOrange)"/>
+  <text x="340" y="435" text-anchor="middle" class="small" fill="#b45309">ALB forwards to pod IPs</text>
+
+  <!-- AZ columns -->
+  <!-- column a -->
+  <g>
+    <rect x="110" y="320" width="220" height="104" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+    <text x="220" y="338" text-anchor="middle" class="small title">AZ us-east-1a</text>
+    <text x="220" y="354" text-anchor="middle" class="small">Public subnet 10.0.1.0/24</text>
+    <rect x="175" y="366" width="90" height="36" rx="5" fill="#ffffff" stroke="#2563eb" stroke-width="1.5"/>
+    <text x="220" y="388" text-anchor="middle" class="small">NAT Gateway</text>
+
+    <rect x="110" y="470" width="220" height="120" rx="6" fill="#e5e7eb" stroke="#4b5563" stroke-width="1.5"/>
+    <text x="220" y="490" text-anchor="middle" class="small">Private subnet 10.0.11.0/24</text>
+    <rect x="165" y="504" width="110" height="36" rx="5" fill="#ffffff" stroke="#4b5563" stroke-width="1.5"/>
+    <text x="220" y="526" text-anchor="middle" class="small">EKS worker node</text>
+  </g>
+
+  <!-- column b -->
+  <g>
+    <rect x="350" y="320" width="220" height="104" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+    <text x="460" y="338" text-anchor="middle" class="small title">AZ us-east-1b</text>
+    <text x="460" y="354" text-anchor="middle" class="small">Public subnet 10.0.2.0/24</text>
+    <rect x="415" y="366" width="90" height="36" rx="5" fill="#ffffff" stroke="#2563eb" stroke-width="1.5"/>
+    <text x="460" y="388" text-anchor="middle" class="small">NAT Gateway</text>
+
+    <rect x="350" y="470" width="220" height="120" rx="6" fill="#e5e7eb" stroke="#4b5563" stroke-width="1.5"/>
+    <text x="460" y="490" text-anchor="middle" class="small">Private subnet 10.0.12.0/24</text>
+    <rect x="405" y="504" width="110" height="36" rx="5" fill="#ffffff" stroke="#4b5563" stroke-width="1.5"/>
+    <text x="460" y="526" text-anchor="middle" class="small">EKS worker node</text>
+  </g>
+
+  <!-- column c -->
+  <g>
+    <rect x="590" y="320" width="220" height="104" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+    <text x="700" y="338" text-anchor="middle" class="small title">AZ us-east-1c</text>
+    <text x="700" y="354" text-anchor="middle" class="small">Public subnet 10.0.3.0/24</text>
+    <rect x="655" y="366" width="90" height="36" rx="5" fill="#ffffff" stroke="#2563eb" stroke-width="1.5"/>
+    <text x="700" y="388" text-anchor="middle" class="small">NAT Gateway</text>
+
+    <rect x="590" y="470" width="220" height="120" rx="6" fill="#e5e7eb" stroke="#4b5563" stroke-width="1.5"/>
+    <text x="700" y="490" text-anchor="middle" class="small">Private subnet 10.0.13.0/24</text>
+    <rect x="645" y="504" width="110" height="36" rx="5" fill="#ffffff" stroke="#4b5563" stroke-width="1.5"/>
+    <text x="700" y="526" text-anchor="middle" class="small">EKS worker node</text>
+  </g>
+
+  <!-- node -> NAT (egress) within each column -->
+  <line x1="220" y1="504" x2="220" y2="402" stroke="#4b5563" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="460" y1="504" x2="460" y2="402" stroke="#4b5563" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="700" y1="504" x2="700" y2="402" stroke="#4b5563" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- EKS control plane -->
+  <rect x="900" y="320" width="260" height="104" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="1030" y="350" text-anchor="middle" class="small title">EKS control plane</text>
+  <text x="1030" y="368" text-anchor="middle" class="small">managed by AWS</text>
+  <text x="1030" y="384" text-anchor="middle" class="small">(outside the VPC)</text>
+
+  <line x1="900" y1="345" x2="330" y2="500" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrowGreen)"/>
+  <line x1="900" y1="362" x2="570" y2="508" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrowGreen)"/>
+  <line x1="900" y1="378" x2="810" y2="500" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrowGreen)"/>
+  <text x="835" y="452" text-anchor="middle" class="small" fill="#15803d">ENIs into every private subnet</text>
+
+  <!-- Terraform state backend -->
+  <rect x="900" y="470" width="260" height="150" rx="8" fill="#f3f4f6" stroke="#6b7280" stroke-width="1.5"/>
+  <text x="1030" y="494" text-anchor="middle" class="small title">Terraform state backend</text>
+  <text x="1030" y="510" text-anchor="middle" class="small">(outside the VPC)</text>
+
+  <rect x="925" y="524" width="90" height="36" rx="18" fill="#ffffff" stroke="#6b7280" stroke-width="1.5"/>
+  <text x="970" y="546" text-anchor="middle" class="small">S3 bucket</text>
+
+  <rect x="1035" y="524" width="100" height="36" rx="6" fill="#ffffff" stroke="#6b7280" stroke-width="1.5"/>
+  <text x="1085" y="546" text-anchor="middle" class="small">DynamoDB</text>
+
+  <text x="1030" y="580" text-anchor="middle" class="small" fill="#6b7280">state + lock, written by</text>
+  <text x="1030" y="596" text-anchor="middle" class="mono small" fill="#6b7280">terraform apply</text>
+
+  <!-- caption -->
+  <text x="620" y="712" text-anchor="middle" class="small" fill="#374151">Shoppers reach pods through the IGW and ALB into private-subnet EKS nodes (3 × t3.medium) across 3 AZs.</text>
+  <text x="620" y="730" text-anchor="middle" class="small" fill="#374151">Nodes reach AWS APIs and image registries through a NAT Gateway per AZ; the control plane reaches nodes via ENIs.</text>
+  <text x="620" y="748" text-anchor="middle" class="small" fill="#374151">Terraform state (S3 + DynamoDB) is outside the VPC and unrelated to runtime traffic.</text>
+</svg>

@@ -3,12 +3,53 @@
 An end-to-end CI/CD pipeline that takes code from pull request to production on
 **Amazon EKS**, with infrastructure provisioned in **Terraform**, CI in
 **GitHub Actions** and GitOps deployment through **Argo CD**, using the
-OpenTelemetry Demo as the workload.
+[OpenTelemetry Demo](https://github.com/open-telemetry/opentelemetry-demo) as the workload.
 
 From a merged pull request to a running pod with no manual steps:
 
 **Pull request** → **build, test, lint** → **merge** → **Docker image** →
 **manifest update** → **Argo CD sync** → **rolling update on EKS**
+
+## CI/CD pipeline
+
+This pipeline is shown end-to-end for the **product-catalog** service — it's the one
+service in the repo wired fully into CI and CD, used throughout this README as the
+running example. The other OpenTelemetry Demo services deploy from their unmodified
+upstream images and don't go through this flow.
+
+![CI/CD pipeline for the product-catalog service: a pull request triggers build and code-quality checks as a required status check; merging to main re-runs those checks, then builds and pushes a Docker image, commits the new tag to the Kubernetes manifest, and Argo CD auto-syncs the change to the EKS cluster.](docs/images/cicd-pipeline.svg)
+
+| Event | Jobs that run |
+|---|---|
+| Pull request to `main` changing `src/product-catalog/` | `build`, `code-quality` |
+| Merge to `main` | `build`, `code-quality`, then `docker` → `updatek8s` |
+
+1. **build**: compiles the Go service and runs its tests.
+2. **code-quality**: static analysis with golangci-lint.
+3. **docker**: builds the image with Buildx and pushes it to Docker Hub, tagged with
+   the workflow run ID.
+4. **updatek8s**: writes the new tag into the product catalog's Deployment manifest
+   and pushes the commit to `main` as `github-actions[bot]`.
+5. **Argo CD** notices the commit within about three minutes and rolls out the new
+   image (automated sync with prune and self-heal).
+
+Images and manifest updates only happen after a merge, so unreviewed pull requests
+never reach the cluster.
+
+## AWS architecture
+
+![AWS architecture: a shopper's request enters through the Internet Gateway and ALB into EKS worker nodes in private subnets across three availability zones; nodes reach the internet for image pulls and AWS API calls through a NAT Gateway per AZ; the EKS control plane reaches nodes via ENIs; Terraform state in S3 and DynamoDB sits outside the VPC.](docs/images/aws-architecture.svg)
+
+| Layer | Resources |
+|---|---|
+| Network | VPC, 3 public + 3 private subnets across `us-east-1a/b/c`, Internet Gateway, one NAT Gateway per AZ, route tables |
+| Compute | EKS 1.36 control plane, managed node group (`t3.medium`, on-demand) |
+| IAM | cluster role (`AmazonEKSClusterPolicy`), node role (worker node, CNI and ECR read policies), IRSA role for the ALB controller |
+| Traffic | AWS Load Balancer Controller, internet-facing ALB in IP target mode, routing to the frontend proxy |
+| State | S3 bucket for Terraform state, DynamoDB table for state locking |
+
+Worker nodes run in private subnets with no public IPs; the only entry point from the
+internet is the ALB in the public subnets.
 
 ## Highlights
 
@@ -31,87 +72,6 @@ From a merged pull request to a running pod with no manual steps:
 
 The application itself is the open-source
 [OpenTelemetry Demo](https://github.com/open-telemetry/opentelemetry-demo) shop.
-
-## AWS architecture
-
-```mermaid
-flowchart TB
-    subgraph aws["AWS: us-east-1"]
-        subgraph vpc["VPC 10.0.0.0/16"]
-            igw[Internet Gateway]
-            alb[Application Load Balancer<br/>created by the ALB Ingress]
-
-            subgraph public["Public subnets: 10.0.1.0/24, 10.0.2.0/24, 10.0.3.0/24"]
-                nat[NAT Gateway<br/>one per AZ]
-            end
-
-            subgraph private["Private subnets: 10.0.11.0/24, 10.0.12.0/24, 10.0.13.0/24"]
-                nodes[EKS managed node group<br/>3 x t3.medium]
-            end
-        end
-        cp[EKS control plane<br/>managed by AWS]
-        s3[(S3 bucket<br/>Terraform state)]
-        ddb[(DynamoDB<br/>state lock)]
-    end
-
-    user([Shopper]) --> igw --> alb
-    alb -->|forwards to pods| nodes
-    nodes -->|outbound: image pulls, AWS APIs| nat --> igw --> internet([Internet])
-    cp <-->|ENIs in private subnets| nodes
-```
-
-| Layer | Resources |
-|---|---|
-| Network | VPC, 3 public + 3 private subnets across `us-east-1a/b/c`, Internet Gateway, one NAT Gateway per AZ, route tables |
-| Compute | EKS 1.36 control plane, managed node group (`t3.medium`, on-demand) |
-| IAM | cluster role (`AmazonEKSClusterPolicy`), node role (worker node, CNI and ECR read policies), IRSA role for the ALB controller |
-| Traffic | AWS Load Balancer Controller, internet-facing ALB in IP target mode, routing to the frontend proxy |
-| State | S3 bucket for Terraform state, DynamoDB table for state locking |
-
-Worker nodes run in private subnets with no public IPs; the only entry point from the
-internet is the ALB in the public subnets.
-
-## CI/CD pipeline
-
-```mermaid
-flowchart LR
-    dev([Developer]) -->|pull request| pr[Pull request to main]
-
-    subgraph ci["GitHub Actions"]
-        build[build<br/>go build + go test]
-        lint[code-quality<br/>golangci-lint]
-        docker[docker<br/>build and push image]
-        update[updatek8s<br/>commit new image tag]
-    end
-
-    pr --> build
-    pr --> lint
-    pr -->|merge| main[main branch]
-    main --> build --> docker --> update
-    docker --> hub[(Docker Hub<br/>desmondyau/product-catalog)]
-    update -->|commit| manifest[kubernetes/productcatalog/deploy.yaml]
-
-    manifest -->|watched by| argo[Argo CD]
-    argo -->|sync| eks[EKS cluster]
-    hub -->|image pull| eks
-```
-
-| Event | Jobs that run |
-|---|---|
-| Pull request to `main` changing `src/product-catalog/` | `build`, `code-quality` |
-| Merge to `main` | `build`, `code-quality`, then `docker` → `updatek8s` |
-
-1. **build**: compiles the Go service and runs its tests.
-2. **code-quality**: static analysis with golangci-lint.
-3. **docker**: builds the image with Buildx and pushes it to Docker Hub, tagged with
-   the workflow run ID.
-4. **updatek8s**: writes the new tag into the product catalog's Deployment manifest
-   and pushes the commit to `main` as `github-actions[bot]`.
-5. **Argo CD** notices the commit within about three minutes and rolls out the new
-   image (automated sync with prune and self-heal).
-
-Images and manifest updates only happen after a merge, so unreviewed pull requests
-never reach the cluster.
 
 ## Repository layout
 

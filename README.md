@@ -102,17 +102,17 @@ internet is the ALB in the public subnets.
 
 ## Screenshots
 
-**CI: GitHub Actions after a merge to `main`.** All four jobs pass: `build` and
+**1. CI: GitHub Actions after a merge to `main`.** All four jobs pass: `build` and
 `code-quality`, then `docker` → `updatek8s`.
 
 ![GitHub Actions run triggered by a push to main: build, code-quality, docker and updatek8s all succeeded](docs/images/ci_github_actions.png)
 
-**CD: Argo CD.** The `product-catalog` application is Healthy and Synced to `main`, with
+**2. CD: Argo CD.** The `product-catalog` application is Healthy and Synced to `main`, with
 the last sync triggered by the `github-actions[bot]` image-tag commit.
 
 ![Argo CD UI showing the product-catalog application Healthy and Synced, with its Service, Deployment, ReplicaSets and running pod](docs/images/cd_ArgoCD.png)
 
-**The deployed shop,** served from EKS through the ALB.
+**3. The deployed shop,** served from EKS through the ALB.
 
 ![OpenTelemetry Demo shop home page served through the Application Load Balancer](docs/images/deployed_app.png)
 

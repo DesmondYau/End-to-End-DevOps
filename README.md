@@ -22,14 +22,12 @@ How a code change reaches the cluster, with no manual steps after the merge:
    `code-quality` job (golangci-lint) on the pull request.
 3. Once the checks pass and the pull request is reviewed, it's merged into `main`,
    which triggers the workflow again.
-4. The `docker` job builds the image with **Buildx** and pushes it to **Docker Hub**
+4. The `docker` job builds the image with **Buildx** and pushes it to **Docker Hub**.
 5. The `updatek8s` job writes the new image tag into the product catalog's Kubernetes
    Deployment manifest and commits it to `main`.
 6. **Argo CD** detects the manifest change and syncs it to the **EKS** cluster.
 7. Kubernetes runs a **rolling update**, replacing the old product-catalog pods with
    ones running the new image.
-
-
 
 | Stage | Job | Description |
 |---|---|---|
@@ -83,7 +81,6 @@ internet is the ALB in the public subnets.
    - Argo CD watches the repository and **automatically syncs** the cluster to Git.
    - **Self-healing** and **pruning** keep the cluster matching Git.
 
-
 <br>
 
 ## Repository layout
@@ -112,7 +109,7 @@ Screenshots to add (put images in docs/images/ and link them here):
 
 Terraform · AWS (VPC, EKS, EC2, IAM, ALB, S3, DynamoDB) · Kubernetes · Helm ·
 AWS Load Balancer Controller · Docker / Buildx · Docker Hub · GitHub Actions ·
-Argo CD 
+Argo CD
 
 <br>
 

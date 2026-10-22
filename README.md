@@ -28,24 +28,15 @@ How a code change reaches the cluster, with no manual steps after the merge:
 7. Kubernetes runs a **rolling update**, replacing the old product-catalog pods with
    ones running the new image.
 
-| Event | Jobs that run |
-|---|---|
-| Pull request to `main` changing `src/product-catalog/` | `build`, `code-quality` |
-| Merge to `main` | `build`, `code-quality`, then `docker` → `updatek8s` |
 
-**CI: GitHub Actions jobs** ([`ci.yaml`](.github/workflows/ci.yaml))
 
-1. **build**: compiles the Go service and runs its tests.
-2. **code-quality**: static analysis with golangci-lint.
-3. **docker**: builds the image with Buildx and pushes it to Docker Hub, tagged with
-   the workflow run ID.
-4. **updatek8s**: writes the new tag into the product catalog's Deployment manifest
-   and pushes the commit to `main` as `github-actions[bot]`.
-
-**CD: Argo CD** ([`cd-product-catelog.yaml`](Argo%20CD/cd-product-catelog.yaml))
-
-Argo CD watches the repo, notices the manifest commit within about three minutes and
-rolls out the new image (automated sync with prune and self-heal).
+| Stage | Job | Description |
+|---|---|---|
+| CI: GitHub Actions ([`ci.yaml`](.github/workflows/ci.yaml)) | `build` | Compiles the Go service and runs its tests. |
+| CI: GitHub Actions | `code-quality` | Static analysis with golangci-lint. |
+| CI: GitHub Actions | `docker` | Builds the image with Buildx and pushes it to Docker Hub, tagged with the workflow run ID. |
+| CI: GitHub Actions | `updatek8s` | Writes the new tag into the product catalog's Deployment manifest and pushes the commit to `main` as `github-actions[bot]`. |
+| CD: Argo CD ([`cd-product-catelog.yaml`](Argo%20CD/cd-product-catelog.yaml)) | `product-catalog` Application | Watches the repo, notices the manifest commit within about three minutes and rolls out the new image (automated sync with prune and self-heal). |
 
 
 ## AWS architecture

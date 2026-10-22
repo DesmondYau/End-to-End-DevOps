@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/DesmondYau/end-to-end-devops.git
+    repoURL: https://github.com/DesmondYau/End-to-End-DevOps.git
     targetRevision: main
     path: kubernetes/productcatalog
   destination:

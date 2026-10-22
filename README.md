@@ -1,6 +1,6 @@
 # End-to-End DevOps: Microservices E-commerce on AWS EKS
 
-An end-to-end CI/CD pipeline that takes code from pull request to production on
+An end-to-end **CI/CD pipeline** that takes code from pull request to production on
 **Amazon EKS**, with infrastructure provisioned in **Terraform**, CI in
 **GitHub Actions** and GitOps deployment through **Argo CD**, using the
 [OpenTelemetry Demo](https://github.com/open-telemetry/opentelemetry-demo) microservices as the workload.
@@ -67,15 +67,18 @@ internet is the ALB in the public subnets.
      the control plane and the nodes.
    - **Remote state** in **S3** with **DynamoDB locking**.
    - Reusable **modules** for network and cluster.
+
 2. **Kubernetes on EKS** ([`kubernetes/`](kubernetes/))
    - Per-service **Deployments and Services** and a dedicated **service account**.
    - An internet-facing **Application Load Balancer** through the **AWS Load Balancer
      Controller**.
    - Worker nodes run in **private subnets** with no public IPs.
+
 3. **Continuous integration (GitHub Actions)** ([`ci.yaml`](.github/workflows/ci.yaml))
    - Every pull request is **built, unit-tested and linted** (golangci-lint).
    - On merge, the pipeline **builds and pushes a Docker image** with **Buildx**.
    - It then **commits the new image tag** to the Kubernetes manifests.
+
 4. **Continuous deployment (Argo CD, GitOps)** ([`Argo CD/`](Argo%20CD/))
    - Argo CD watches the repository and **automatically syncs** the cluster to Git.
    - **Self-healing** and **pruning** keep the cluster matching Git.

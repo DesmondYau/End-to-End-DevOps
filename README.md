@@ -10,7 +10,9 @@ An end-to-end **CI/CD pipeline** that takes code from pull request to production
 ## CI/CD pipeline
 
 The pipeline is set up for the **product-catalog** service as this repo's running
-example; the other OpenTelemetry Demo services use their upstream images.
+example; the other OpenTelemetry Demo services use their upstream images. See a
+[successful run](https://github.com/DesmondYau/End-to-End-DevOps/actions/runs/39540855476)
+of all four jobs after a merge to `main`.
 
 ![CI/CD pipeline for the product-catalog service: a pull request triggers build and code-quality checks as a required status check; merging to main re-runs those checks, then builds and pushes a Docker image, commits the new tag to the Kubernetes manifest, and Argo CD auto-syncs the change to the EKS cluster.](docs/images/cicd-pipeline.svg)
 

@@ -3,7 +3,9 @@
 An end-to-end CI/CD pipeline that takes code from pull request to production on
 **Amazon EKS**, with infrastructure provisioned in **Terraform**, CI in
 **GitHub Actions** and GitOps deployment through **Argo CD**, using the
-[OpenTelemetry Demo](https://github.com/open-telemetry/opentelemetry-demo) as the workload.
+[OpenTelemetry Demo](https://github.com/open-telemetry/opentelemetry-demo) microservices as the workload.
+
+<br>
 
 ## CI/CD pipeline
 
@@ -20,8 +22,7 @@ How a code change reaches the cluster, with no manual steps after the merge:
    `code-quality` job (golangci-lint) on the pull request.
 3. Once the checks pass and the pull request is reviewed, it's merged into `main`,
    which triggers the workflow again.
-4. The `docker` job builds the image with **Buildx** and pushes it to **Docker Hub**,
-   tagged with the workflow run ID.
+4. The `docker` job builds the image with **Buildx** and pushes it to **Docker Hub**
 5. The `updatek8s` job writes the new image tag into the product catalog's Kubernetes
    Deployment manifest and commits it to `main`.
 6. **Argo CD** detects the manifest change and syncs it to the **EKS** cluster.
@@ -38,6 +39,7 @@ How a code change reaches the cluster, with no manual steps after the merge:
 | CI: GitHub Actions | `updatek8s` | Writes the new tag into the product catalog's Deployment manifest and pushes the commit to `main` as `github-actions[bot]`. |
 | CD: Argo CD ([`cd-product-catelog.yaml`](Argo%20CD/cd-product-catelog.yaml)) | `product-catalog` Application | Watches the repo, notices the manifest commit within about three minutes and rolls out the new image (automated sync with prune and self-heal). |
 
+<br>
 
 ## AWS architecture
 
@@ -54,27 +56,32 @@ How a code change reaches the cluster, with no manual steps after the merge:
 Worker nodes run in private subnets with no public IPs; the only entry point from the
 internet is the ALB in the public subnets.
 
+<br>
+
 ## Highlights
 
-- **Infrastructure as code (Terraform):** a production-style **VPC** across **3
-  availability zones** with **public and private subnets**, **NAT gateways** and
-  route tables; an **EKS** cluster with a **managed node group** and separate
-  **IAM roles** for the control plane and the nodes; **remote state** in **S3**
-  with **DynamoDB locking**; reusable **modules** for network and cluster.
-- **Kubernetes on EKS:** per-service **Deployments and Services**, a dedicated
-  **service account**, and an internet-facing **Application Load Balancer** through
-  the **AWS Load Balancer Controller**, using **IAM roles for service accounts
-  (IRSA)**. Worker nodes run in **private subnets** with no public IPs.
-- **Continuous integration (GitHub Actions):** every pull request is **built,
-  unit-tested and linted** (golangci-lint); on merge, the pipeline **builds and pushes
-  a Docker image** with **Buildx** and **commits the new image tag** to the
-  Kubernetes manifests.
-- **Continuous deployment (Argo CD, GitOps):** Argo CD watches the repository and
-  **automatically syncs** the cluster to Git, with **self-healing** and **pruning**,
-  rolling out each new image with zero manual `kubectl` steps.
+1. **Infrastructure as code (Terraform)** ([`terraform/`](terraform/))
+   - A production-style **VPC** across **3 availability zones** with **public and
+     private subnets**, **NAT gateways** and route tables.
+   - An **EKS** cluster with a **managed node group** and separate **IAM roles** for
+     the control plane and the nodes.
+   - **Remote state** in **S3** with **DynamoDB locking**.
+   - Reusable **modules** for network and cluster.
+2. **Kubernetes on EKS** ([`kubernetes/`](kubernetes/))
+   - Per-service **Deployments and Services** and a dedicated **service account**.
+   - An internet-facing **Application Load Balancer** through the **AWS Load Balancer
+     Controller**.
+   - Worker nodes run in **private subnets** with no public IPs.
+3. **Continuous integration (GitHub Actions)** ([`ci.yaml`](.github/workflows/ci.yaml))
+   - Every pull request is **built, unit-tested and linted** (golangci-lint).
+   - On merge, the pipeline **builds and pushes a Docker image** with **Buildx**.
+   - It then **commits the new image tag** to the Kubernetes manifests.
+4. **Continuous deployment (Argo CD, GitOps)** ([`Argo CD/`](Argo%20CD/))
+   - Argo CD watches the repository and **automatically syncs** the cluster to Git.
+   - **Self-healing** and **pruning** keep the cluster matching Git.
 
-The application itself is the open-source
-[OpenTelemetry Demo](https://github.com/open-telemetry/opentelemetry-demo) shop.
+
+<br>
 
 ## Repository layout
 
@@ -96,11 +103,15 @@ Screenshots to add (put images in docs/images/ and link them here):
 - the shop's home page served through the ALB
 -->
 
+<br>
+
 ## Tech stack
 
 Terraform · AWS (VPC, EKS, EC2, IAM, ALB, S3, DynamoDB) · Kubernetes · Helm ·
 AWS Load Balancer Controller · Docker / Buildx · Docker Hub · GitHub Actions ·
-Argo CD · Go
+Argo CD 
+
+<br>
 
 ## Credits
 

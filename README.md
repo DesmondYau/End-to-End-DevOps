@@ -56,6 +56,24 @@ How a code change reaches the cluster, with no manual steps after the merge:
 Worker nodes run in private subnets with no public IPs; the only entry point from the
 internet is the ALB in the public subnets.
 
+How an incoming request reaches a pod:
+
+1. **DNS.** The user's browser resolves the domain through **Route 53**. An Alias record
+   points at the Application Load Balancer, so Route 53 returns the public IPs of the
+   ALB nodes. Those nodes run in the three public subnets, one each in `us-east-1a`,
+   `us-east-1b` and `us-east-1c`.
+2. **Into the VPC.** The request comes in through the **Internet Gateway**. The IGW does
+   one-to-one NAT, translating the ALB node's public IP to its private IP, and delivers
+   the packet into the public subnet.
+3. **Layer 7 routing at the ALB.** The ALB terminates TLS and checks the request's host
+   and path against its routing rules. Those rules are built by the **AWS Load Balancer
+   Controller** from the Kubernetes Ingress manifest
+   ([`ingress.yaml`](kubernetes/frontendproxy/ingress.yaml)).
+4. **Straight to the pods (IP target mode).** The **VPC CNI** gives each pod a real IP
+   from the private subnets. The controller keeps those pod IPs registered in the ALB's
+   target group. That means the ALB skips NodePort and kube-proxy and sends traffic
+   directly to a healthy pod, spread across all three AZs. That pod is the **Envoy frontend-proxy**, which routes the request to the right microservice inside the cluster.
+
 <br>
 
 ## Highlights
